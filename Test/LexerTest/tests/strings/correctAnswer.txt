@@ -1,0 +1,4 @@
+(1, 1)		String		'egorka'		'egorka'
+(2, 1)		String		'string'		'string'
+(3, 1)		String		'1'		'1'
+(4, 1)		String		'1234567890qwertyuiop[]asdfghjkl;zxcvbnm,.//*-+'		'1234567890qwertyuiop[]asdfghjkl;zxcvbnm,.//*-+'

@@ -1,10 +1,12 @@
 ﻿using System.IO;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-            //var command = Console.ReadLine().Trim().Split(' ');
+            // var command = Console.ReadLine().Trim().Split(' ');
             var command = args; //todo: Удали потом
             var typeAnalyze = "";
             var typeRead = "";
@@ -15,7 +17,9 @@ namespace Compiler {
                 }
                 else if ( str == "file" ) {
                     typeRead = str;
-                    // File.Create("'input.txt'");
+                }
+                else if ( str == "dir" ) {
+                    typeRead = str;
                 }
                 else if ( File.Exists(Lexer.testsPath + str) || Directory.Exists(Lexer.testsPath + str) ) {
                     path = str;
@@ -33,6 +37,7 @@ namespace Compiler {
                             }
 
                         } while ( !lexer.GetCurrentLexem().isEOF() );
+                        lexer.Close();
                     }
                 }
             }

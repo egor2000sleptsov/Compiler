@@ -1,0 +1,7 @@
+﻿a
+aA
+Program
+cameCase
+something_case
+withDigit123
+test_qwe_123
