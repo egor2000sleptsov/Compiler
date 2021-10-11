@@ -30,7 +30,6 @@ namespace Compiler {
                                                          { "Tab", '\t' },
                                                          { "NewLine", '\n' },
                                                          { "NewLine_r", '\r' },
-                                                         { "Underline", '_' },
                                                      };
 
         private ArrayList _operations = new ArrayList() {
@@ -66,7 +65,7 @@ namespace Compiler {
                 switch ( _state ) {
                     case States.Start:
                         if ( _whitespaces.ContainsValue(_symbol) ) {
-                            if ( _whitespaces["NewLine"] == _symbol ) NextLine();
+                            if ( '\n' == _symbol ) NextLine();
                             GetNextSymbol();
                         }
                         else if ( Char.IsLetter(_symbol) ) KeepSymbol(States.Identifier, true);
@@ -81,12 +80,11 @@ namespace Compiler {
                         break;
 
                     case States.Identifier:
-                        if ( Char.IsLetterOrDigit(_symbol) || _whitespaces["Underline"] == _symbol ) KeepSymbol();
+                        if ( Char.IsLetterOrDigit(_symbol) || '_' == _symbol ) KeepSymbol();
                         else if ( _operations.Contains(_buffer.ToLower()) ) 
                             return SetAndReturnLexem(_buffer.ToLower(), States.Operation);
                         else return SetAndReturnLexem(_buffer.ToLower());
                         
-
                         break;
 
                     case States.Integer:
@@ -123,7 +121,7 @@ namespace Compiler {
                     case States.String:
                         KeepSymbol();
                         if ( _symbol.Equals('\u0027') ) {
-                            KeepSymbol();
+                            KeepSymbol(); //
                             return SetAndReturnLexem();// todo : нужно ли убрать кавычку в начале и конце
                         }
 
