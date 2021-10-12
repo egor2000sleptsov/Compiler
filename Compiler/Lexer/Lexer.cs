@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 
 //todo: Ошибки, Директории обрабатывать, тесты, еще сделать зарезервированные слова 
 
@@ -15,6 +17,7 @@ namespace Compiler {
             RealEDegree, //done
             Identifier, //Переменная done
             String, // done
+            StringASCII,
             Operation, // done
             OneLineComment, // done
             ManyLineComment, // фигурные скобки, обрабатывать как строку (логика).   КОММЕНТЫ ЭТО НЕ ЛЕКСЕМЫ НЕ ДОБАВЛЯЙ ИХ, ДУРАК done
@@ -26,11 +29,11 @@ namespace Compiler {
         }
 
         private Dictionary<string, char> _whitespaces = new Dictionary<string, char> {
-                                                         { "Space", ' ' },
-                                                         { "Tab", '\t' },
-                                                         { "NewLine", '\n' },
-                                                         { "NewLine_r", '\r' },
-                                                     };
+                                                            { "Space", ' ' },
+                                                            { "Tab", '\t' },
+                                                            { "NewLine", '\n' },
+                                                            { "NewLine_r", '\r' },
+                                                        };
 
         private ArrayList _operations = new ArrayList() {
                                                             '+', '-', '*', '/', '=', '<', '>', "div", "mod", "not",
@@ -38,7 +41,7 @@ namespace Compiler {
                                                             "int", "trunc", "round", "frac", "odd", "**"
                                                         };
 
-        private ArrayList _separators = new ArrayList() { '.', ',', ':', ';', '(', ')', '[', ']',".." };
+        private ArrayList _separators = new ArrayList() { '.', ',', ':', ';', '(', ')', '[', ']', ".." };
         private ArrayList _assignments = new ArrayList() { ":=", "+=", "-=", "*=", "/=" };
 
         public static readonly string testsPath = @"F:\Programming\projects\Compiler\Test\LexerTest\tests\";
@@ -61,7 +64,7 @@ namespace Compiler {
 
         public Lexem GetNextLexem() {
             ClearBuff();
-            while ( _buffer != "" || _state != States.EOF) {
+            while ( _buffer != "" || _state != States.EOF ) {
                 switch ( _state ) {
                     case States.Start:
                         if ( _whitespaces.ContainsValue(_symbol) ) {
@@ -74,6 +77,7 @@ namespace Compiler {
                         else if ( _operations.Contains(_symbol) ) KeepSymbol(States.Operation, true);
                         else if ( _symbol.Equals('{') ) KeepSymbol(States.ManyLineComment, true);
                         else if ( _separators.Contains(_symbol) ) KeepSymbol(States.Separator, true);
+                        else if ( _symbol == '#' ) KeepSymbol(States.StringASCII, true);
                         else if ( _symbol.Equals('\uffff') ) _state = States.EOF;
 
 
@@ -81,10 +85,10 @@ namespace Compiler {
 
                     case States.Identifier:
                         if ( Char.IsLetterOrDigit(_symbol) || '_' == _symbol ) KeepSymbol();
-                        else if ( _operations.Contains(_buffer.ToLower()) ) 
+                        else if ( _operations.Contains(_buffer.ToLower()) )
                             return SetAndReturnLexem(_buffer.ToLower(), States.Operation);
                         else return SetAndReturnLexem(_buffer.ToLower());
-                        
+
                         break;
 
                     case States.Integer:
@@ -119,10 +123,50 @@ namespace Compiler {
 
                         break;
                     case States.String:
-                        KeepSymbol();
                         if ( _symbol.Equals('\u0027') ) {
-                            KeepSymbol(); //
-                            return SetAndReturnLexem();// todo : нужно ли убрать кавычку в начале и конце
+                            KeepSymbol();
+                            if ( _symbol == '#' ) {
+                                KeepSymbol(States.StringASCII);
+                            }
+                            else {
+                                var tmp = _buffer;
+                                if ( tmp.Remove(tmp.IndexOf('\u0027'), tmp.IndexOf('\u0027', 1) + 1) == "" ) {
+                                    return SetAndReturnLexem(_buffer.Substring(1, _buffer.Length - 2));
+                                }
+
+                                return SetAndReturnLexem(ParseASCII(_buffer));
+                            }
+                        }
+                        else {
+                            KeepSymbol();
+                        }
+
+                        break;
+
+                    case States.StringASCII:
+                        if ( char.IsDigit(_symbol) ) KeepSymbol();
+                        else if ( _symbol == '#' ) {
+                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
+                            KeepSymbol();
+                        }
+                        // else if ( _symbol == '#' ) {
+                        //     if ( '#' == _buffer[_buffer.Length - 1] ) 
+                        //         throw new Exception();
+                        //     var tmp =
+                        //         new byte[1] {
+                        //                         byte.Parse(_buffer.Substring(_buffer.IndexOf('#') + 1))
+                        //                     };
+                        //     _buffer = _buffer.Substring(0, _buffer.IndexOf('#')) + Encoding.ASCII.GetString(tmp);
+                        //     Console.WriteLine(tmp);
+                        // }
+                        else if ( _symbol == '\u0027' ) {
+                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
+                            KeepSymbol(States.String);
+                        }
+                        else {
+                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
+                            var tmp = "";
+                            return SetAndReturnLexem(ParseASCII(_buffer), States.String);
                         }
 
                         break;
@@ -160,7 +204,7 @@ namespace Compiler {
 
                     case States.Separator:
                         if ( _buffer + _symbol == ":=" ) KeepSymbol(States.Assignment);
-                        else if ( _separators.Contains(_buffer+_symbol) ) {
+                        else if ( _separators.Contains(_buffer + _symbol) ) {
                             KeepSymbol();
                             return SetAndReturnLexem();
                         }
@@ -214,6 +258,37 @@ namespace Compiler {
             state = state == States.Null ? _state : state;
             _state = States.Start;
             return _lexem = new Lexem(_coordinates, state, code, _buffer);
+        }
+
+        private string ParseASCII(string value) {
+            byte[] tmp = new byte[1];
+            char[] sharpAndQuote = { '#', '\u0027' };
+            var result = "";
+            var subject = value;
+            var n = value.Count(x => x == '#');
+            if ( value.StartsWith('\u0027') ) {
+                result += value.Substring(1, value.IndexOf('#') - 2);
+                subject = value.Substring(value.IndexOf('#'));
+            }
+
+            for ( var i = 0; i < n; i++ ) {
+                var j = subject.Substring(1).IndexOfAny(sharpAndQuote) == -1
+                            ? subject.Length - 1
+                            : subject.IndexOfAny(sharpAndQuote, 1) - 1;
+                tmp[0] = byte.Parse(subject.Substring(1, j));
+                result += Encoding.ASCII.GetString(tmp)[0];
+                if ( i + 1 != n) subject = subject.Substring(subject.IndexOfAny(sharpAndQuote, 1));
+                else if ( subject.Contains('\u0027') ) {
+                    subject = subject.Substring(j + 1);
+                    result += subject.Substring(1, subject.Length - 2);
+                }
+                if ( subject.StartsWith('\u0027') && i + 1 != n) {
+                    result += subject.Substring(1, subject.IndexOf('#') - 2);
+                    subject = subject.Substring(subject.IndexOf('#'));
+                }
+            }
+
+            return result;
         }
 
         public void Close() {
