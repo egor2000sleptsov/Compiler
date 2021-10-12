@@ -264,27 +264,26 @@ namespace Compiler {
             byte[] tmp = new byte[1];
             char[] sharpAndQuote = { '#', '\u0027' };
             var result = "";
-            var subject = value;
             var n = value.Count(x => x == '#');
             if ( value.StartsWith('\u0027') ) {
                 result += value.Substring(1, value.IndexOf('#') - 2);
-                subject = value.Substring(value.IndexOf('#'));
+                value = value.Substring(value.IndexOf('#'));
             }
 
             for ( var i = 0; i < n; i++ ) {
-                var j = subject.Substring(1).IndexOfAny(sharpAndQuote) == -1
-                            ? subject.Length - 1
-                            : subject.IndexOfAny(sharpAndQuote, 1) - 1;
-                tmp[0] = byte.Parse(subject.Substring(1, j));
+                var j = value.Substring(1).IndexOfAny(sharpAndQuote) == -1
+                            ? value.Length - 1
+                            : value.IndexOfAny(sharpAndQuote, 1) - 1;
+                tmp[0] = byte.Parse(value.Substring(1, j));
                 result += Encoding.ASCII.GetString(tmp)[0];
-                if ( i + 1 != n) subject = subject.Substring(subject.IndexOfAny(sharpAndQuote, 1));
-                else if ( subject.Contains('\u0027') ) {
-                    subject = subject.Substring(j + 1);
-                    result += subject.Substring(1, subject.Length - 2);
+                if ( i + 1 != n) value = value.Substring(value.IndexOfAny(sharpAndQuote, 1));
+                else if ( value.Contains('\u0027') ) {
+                    value = value.Substring(j + 1);
+                    result += value.Substring(1, value.Length - 2);
                 }
-                if ( subject.StartsWith('\u0027') && i + 1 != n) {
-                    result += subject.Substring(1, subject.IndexOf('#') - 2);
-                    subject = subject.Substring(subject.IndexOf('#'));
+                if ( value.StartsWith('\u0027') && i + 1 != n) {
+                    result += value.Substring(1, value.IndexOf('#') - 2);
+                    value = value.Substring(value.IndexOf('#'));
                 }
             }
 
