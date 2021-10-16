@@ -1,5 +1,5 @@
 1 1		Reserved		const		const
-1 7		Identifier		LIMIT		LIMIT
+1 7		Identifier		limit		LIMIT
 1 13		Operation		=		=
 1 15		Integer		10000		10000
 1 20		Separator		;		;
@@ -26,7 +26,7 @@
 6 8		Assignment		:=		:=
 6 10		Integer		1		1
 6 12		Reserved		to		to
-6 15		Identifier		LIMIT		LIMIT
+6 15		Identifier		limit		LIMIT
 6 21		Reserved		do		do
 6 24		Reserved		begin		begin
 7 6		Identifier		s		s

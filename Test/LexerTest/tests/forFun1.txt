@@ -4,10 +4,10 @@
 4 1		Reserved		begin		begin
 4 7		Reserved		end		end
 5 1		Identifier		qwe123qwe		qwe123qwe
-6 1		Identifier		qwe_123_123_123_123_123qweqw		QWE_123_123_123_123_123QWEQW
-7 1		Identifier		q00000000000000__________		Q00000000000000__________
+6 1		Identifier		QWE_123_123_123_123_123QWEQW		QWE_123_123_123_123_123QWEQW
+7 1		Identifier		Q00000000000000__________		Q00000000000000__________
 8 1		Operation		div		DIV
 9 1		Operation		mod		MOD
 10 1		Reserved		else		ELSE
-11 1		Identifier		lower		LOWER
-12 1		Identifier		qwe		QWE
+11 1		Identifier		LOWER		LOWER
+12 1		Identifier		QWE		QWE

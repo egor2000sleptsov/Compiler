@@ -113,7 +113,7 @@ namespace Compiler {
                                   _whitespaces.ContainsValue(_symbol) ||
                                   _operations.Contains(_symbol) ||
                                   _symbol.Equals('\uffff') ) {
-                            return SetAndReturnLexem();
+                            return SetAndReturnLexem(_buffer.ToLower());
                         }
                         else {
                             ThrowException();

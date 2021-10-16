@@ -1,0 +1,10 @@
+1 1		String		egorka		'egorka'
+2 1		String		1234567890-=asdfghjkl;zxcvbnm,.//*-+		'1234567890-=asdfghjkl;zxcvbnm,.//*-+'
+3 1		String		6		''#54
+4 1		String		6{qwe|		#54#123'qwe'#124
+5 1		String		6		''#54
+6 1		String		6		''#54
+7 1		String		6		''#54
+8 1		String		6123qwe7K		#54'123qwe'#55#75
+9 1		String				''
+9 3		String		q		'q'
