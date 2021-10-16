@@ -1,42 +1,34 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using System.Threading.Channels;
 using Compiler;
 using NUnit.Framework;
+using NUnit.Framework.Internal;
 
 namespace Test {
     public class LexerTest {
+
         [Test]
-        [TestCase(@"identifiers")]
-        [TestCase(@"integers")]
-        [TestCase(@"strings")]
-        public void Test(string testDir) {
-            var path = Lexer.testsPath + testDir + @"\";
-            var lexer = new Lexer(testDir + @"\" + "input.txt");
-            var flag = true;
-            using ( var sw = new StreamWriter(path + "output.txt") ) {
-                do {
-                    lexer.GetNextLexem();
-                    if ( !lexer.GetCurrentLexem().isEOF() ) {
-                        sw.WriteLine(lexer.GetCurrentLexem().ToString());
-                    }
-                } while ( !lexer.GetCurrentLexem().isEOF() );
-            }
-
-            lexer.Close();
-            using ( var correctAnswerFileReader = new StreamReader(path + "correctAnswer.txt") )
-                using ( var outputFileReader = new StreamReader(path + "output.txt") ) {
-                    while ( !correctAnswerFileReader.EndOfStream && !outputFileReader.EndOfStream && flag ) {
-                        if ( !((char)correctAnswerFileReader.Read() == (char)outputFileReader.Read()) ) {
-                            flag = false;
+        public void Test() {
+            IEnumerable<string> inputFiles = Directory.EnumerateFiles(Lexer.testsPath);
+            foreach ( string inputFile in inputFiles ) {
+                var fileName = inputFile.Substring(inputFile.LastIndexOf('\\') + 1);
+                var sw = new StreamWriter($"{Lexer.testsPath}result\\{fileName}");
+                var lexer = new Lexer(fileName);
+                try {
+                    do {
+                        if ( !lexer.GetNextLexem().isEOF() ) {
+                            sw.WriteLine(lexer.GetCurrentLexem().ToString());
                         }
-
-                        if ( correctAnswerFileReader.EndOfStream != outputFileReader.EndOfStream ) {
-                            flag = false;
-                        }
-                    }
+                    } while ( !lexer.GetCurrentLexem().isEOF() );
                 }
-
-            Assert.AreEqual(true, flag);
+                catch ( Exception e ) {
+                    sw.WriteLine(e);
+                }
+                sw.Close();
+            }
         }
     }
 }

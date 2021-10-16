@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.SymbolStore;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,12 +13,13 @@ namespace Compiler {
         public enum States {
             Start = 1,
             Integer, //done
+            Reserved, //done
             Real, //done
             RealE, //done
             RealEDegree, //done
             Identifier, //Переменная done
             String, // done
-            StringASCII,
+            StringASCII, // done
             Operation, // done
             OneLineComment, // done
             ManyLineComment, // фигурные скобки, обрабатывать как строку (логика).   КОММЕНТЫ ЭТО НЕ ЛЕКСЕМЫ НЕ ДОБАВЛЯЙ ИХ, ДУРАК done
@@ -40,6 +42,23 @@ namespace Compiler {
                                                             "and", "or", "ord", "chr", "sizeof", "pi",
                                                             "int", "trunc", "round", "frac", "odd", "**"
                                                         };
+
+        private ArrayList _reserved = new ArrayList() {
+                                                          "and", "array", "as", "auto", "begin", "case", "class",
+                                                          "const", "constructor", "destructor", "div", "do", "downto",
+                                                          "else", "end", "event", "except", "extensionmethod", "file",
+                                                          "finalization", "finally", "for", "foreach", "function",
+                                                          "goto", "if", "implementation", "in", "inherited",
+                                                          "initialization", "interface", "is", "label", "lock", "loop",
+                                                          "mod", "nil", "not", "of", "operator", "or", "procedure",
+                                                          "program", "property", "raise", "record", "repeat", "sealed",
+                                                          "set", "sequence", "shl", "shr", "sizeof", "template", "then",
+                                                          "to", "try", "type", "typeof", "until", "uses", "using",
+                                                          "var", "where", "while", "with", "xor", "abstract", "default",
+                                                          "external", "forward", "internal", "on", "overload",
+                                                          "override", "params", "private", "protected", "public",
+                                                          "read", "readln", "reintroduce", "unit", "virtual", "write", "writeln"
+                                                      };
 
         private ArrayList _separators = new ArrayList() { '.', ',', ':', ';', '(', ')', '[', ']', ".." };
         private ArrayList _assignments = new ArrayList() { ":=", "+=", "-=", "*=", "/=" };
@@ -87,22 +106,41 @@ namespace Compiler {
                         if ( Char.IsLetterOrDigit(_symbol) || '_' == _symbol ) KeepSymbol();
                         else if ( _operations.Contains(_buffer.ToLower()) )
                             return SetAndReturnLexem(_buffer.ToLower(), States.Operation);
-                        else return SetAndReturnLexem(_buffer.ToLower());
+                        else if ( _reserved.Contains(_buffer.ToLower()) )
+                            return SetAndReturnLexem(_buffer.ToLower(), States.Reserved);
+                        else if ( _separators.Contains(_symbol) ||
+                                  _whitespaces.ContainsValue(_symbol) ||
+                                  _operations.Contains(_symbol) ||
+                                  _symbol.Equals('\uffff') ) {
+                            return SetAndReturnLexem();
+                        }
+                        else {
+                            ThrowException();
+                        }
 
                         break;
 
                     case States.Integer:
-                        if ( char.IsDigit(_symbol) ) KeepSymbol();
+                        if ( char.ToLower(_symbol) == 'e' ) KeepSymbol(States.RealE);
+                        else if ( char.IsDigit(_symbol) ) KeepSymbol();
                         else if ( _symbol == '.' ) KeepSymbol(States.Real);
-                        else return SetAndReturnLexem(int.Parse(_buffer));
+                        else if ( _separators.Contains(_symbol) ||
+                                  _whitespaces.ContainsValue(_symbol) ||
+                                  _operations.Contains(_symbol) ||
+                                  _symbol.Equals('\uffff')
+                        ) return SetAndReturnLexem(int.Parse(_buffer));
+                        else ThrowException();
 
                         break;
 
                     case States.Real:
                         if ( char.IsDigit(_symbol) ) KeepSymbol();
                         else if ( char.ToLower(_symbol) == 'e' ) KeepSymbol(States.RealE);
-                        else return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')));
-
+                        else if ( _separators.Contains(_symbol) ||
+                                  _whitespaces.ContainsValue(_symbol) ||
+                                  _operations.Contains(_symbol) )
+                            return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')));
+                        else ThrowException();
                         break;
 
                     case States.RealE:
@@ -110,32 +148,36 @@ namespace Compiler {
                         else if ( _symbol == '+' || _symbol == '-' ) {
                             KeepSymbol();
                             if ( char.IsDigit(_symbol) ) KeepSymbol(States.RealEDegree);
-                            else throw new Exception(); //TODO: Создай класс ошибок
+                            else ThrowException();
                         }
-                        else throw new Exception();
+                        else ThrowException();
 
 
                         break;
 
                     case States.RealEDegree:
                         if ( char.IsDigit(_symbol) ) KeepSymbol();
-                        else return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')));
+                        else return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')), States.Real);
 
                         break;
                     case States.String:
                         if ( _symbol.Equals('\u0027') ) {
+                            
                             KeepSymbol();
                             if ( _symbol == '#' ) {
                                 KeepSymbol(States.StringASCII);
                             }
                             else {
-                                var tmp = _buffer;
-                                if ( tmp.Remove(tmp.IndexOf('\u0027'), tmp.IndexOf('\u0027', 1) + 1) == "" ) {
+                                var buffer = _buffer;
+                                if ( buffer.Remove(buffer.IndexOf('\u0027'), buffer.IndexOf('\u0027', 1) + 1) == "" ) {
                                     return SetAndReturnLexem(_buffer.Substring(1, _buffer.Length - 2));
                                 }
 
                                 return SetAndReturnLexem(ParseASCII(_buffer));
                             }
+                        }
+                        else if ( _symbol == '\n' || _symbol == '\uffff' ) {
+                            ThrowException();
                         }
                         else {
                             KeepSymbol();
@@ -146,27 +188,27 @@ namespace Compiler {
                     case States.StringASCII:
                         if ( char.IsDigit(_symbol) ) KeepSymbol();
                         else if ( _symbol == '#' ) {
-                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
+                            if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
                             KeepSymbol();
                         }
-                        // else if ( _symbol == '#' ) {
-                        //     if ( '#' == _buffer[_buffer.Length - 1] ) 
-                        //         throw new Exception();
-                        //     var tmp =
-                        //         new byte[1] {
-                        //                         byte.Parse(_buffer.Substring(_buffer.IndexOf('#') + 1))
-                        //                     };
-                        //     _buffer = _buffer.Substring(0, _buffer.IndexOf('#')) + Encoding.ASCII.GetString(tmp);
-                        //     Console.WriteLine(tmp);
-                        // }
                         else if ( _symbol == '\u0027' ) {
-                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
+                            if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
                             KeepSymbol(States.String);
+                        } 
+                        else if ( _symbol == '\uffff' ) {
+                            if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
+                            return SetAndReturnLexem(ParseASCII(_buffer), States.String);
                         }
                         else {
-                            if ( _buffer[_buffer.Length - 1] == '#' ) throw new Exception();
-                            var tmp = "";
-                            return SetAndReturnLexem(ParseASCII(_buffer), States.String);
+                            if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
+                            if ( _operations.Contains(_symbol) ||
+                                 _separators.Contains(_symbol) ||
+                                 _whitespaces.ContainsValue(_symbol)
+                            ) {
+                                return SetAndReturnLexem(ParseASCII(_buffer), States.String);
+                            }
+
+                            ThrowException();
                         }
 
                         break;
@@ -177,7 +219,7 @@ namespace Compiler {
                             KeepSymbol(States.Assignment);
                         }
                         else {
-                            if ( _operations.Contains(_symbol + _buffer) ) AddBuff();
+                            if ( _operations.Contains(_symbol + _buffer) ) KeepSymbol();
                             return SetAndReturnLexem(_buffer.ToLower());
                         }
 
@@ -193,10 +235,13 @@ namespace Compiler {
 
                     case States.ManyLineComment:
                         if ( _symbol.Equals('}') ) {
-                            KeepSymbol();
-                            _state = States.Start;
+                            KeepSymbol(States.Start);
                             ClearBuff();
                             // return GetNextLexem();
+                        }
+                        else if ( _symbol == '\uffff' ) {
+                            _state = States.EOF;
+                            ClearBuff();
                         }
                         else KeepSymbol();
 
@@ -276,18 +321,24 @@ namespace Compiler {
                             : value.IndexOfAny(sharpAndQuote, 1) - 1;
                 tmp[0] = byte.Parse(value.Substring(1, j));
                 result += Encoding.ASCII.GetString(tmp)[0];
-                if ( i + 1 != n) value = value.Substring(value.IndexOfAny(sharpAndQuote, 1));
+                if ( i + 1 != n ) value = value.Substring(value.IndexOfAny(sharpAndQuote, 1));
                 else if ( value.Contains('\u0027') ) {
                     value = value.Substring(j + 1);
                     result += value.Substring(1, value.Length - 2);
                 }
-                if ( value.StartsWith('\u0027') && i + 1 != n) {
+
+                if ( value.StartsWith('\u0027') && i + 1 != n ) {
                     result += value.Substring(1, value.IndexOf('#') - 2);
                     value = value.Substring(value.IndexOf('#'));
                 }
             }
 
             return result;
+        }
+
+        private void ThrowException() {
+            throw new LexerException(
+                $"Unexpected symbol '{_symbol}' at ({_coordinates.Item1},{_coordinates.Item2 + _buffer.Length})");
         }
 
         public void Close() {

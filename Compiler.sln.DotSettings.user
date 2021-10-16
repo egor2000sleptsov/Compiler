@@ -2,9 +2,12 @@
 	<s:String x:Key="/Default/Environment/AssemblyExplorer/XmlDocument/@EntryValue">&lt;AssemblyExplorer&gt;&#xD;
   &lt;Assembly Path="F:\Programming\projects\Compiler\Compiler\bin\Debug\net5.0\Compiler.dll" /&gt;&#xD;
 &lt;/AssemblyExplorer&gt;</s:String>
-	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=35987362_002D6311_002D4048_002D97a8_002D7958807984e5/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="Test" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
+	
+	
+	
+	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=ed2bc42b_002D6c55_002D4ea4_002Db694_002Df98bd361520e/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="LexerTest #3" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
   &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::2CA17C2C-539B-4894-8C76-9CAEFF01D46C::net5.0::Test.LexerTest.Test&lt;/TestId&gt;&#xD;
+    &lt;TestId&gt;NUnit3x::2CA17C2C-539B-4894-8C76-9CAEFF01D46C::net5.0::Test.LexerTest&lt;/TestId&gt;&#xD;
   &lt;/TestAncestor&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	

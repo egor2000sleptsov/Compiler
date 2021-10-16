@@ -1,7 +1,0 @@
-(1, 1)		Identifier		a		a
-(2, 1)		Identifier		aa		aA
-(3, 1)		Identifier		program		Program
-(4, 1)		Identifier		camecase		cameCase
-(5, 1)		Identifier		something_case		something_case
-(6, 1)		Identifier		withdigit123		withDigit123
-(7, 1)		Identifier		test_qwe_123		test_qwe_123

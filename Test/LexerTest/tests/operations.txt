@@ -1,0 +1,3 @@
+** +-*/=<>/-*+/-+*-/*-/*-/+*/-*+/*-+/-*+-/* div mod not 
+and or ord chr sizeof pi 
+int trunc round frac odd **

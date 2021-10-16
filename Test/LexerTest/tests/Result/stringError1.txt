@@ -1,0 +1,4 @@
+Compiler.LexerException: Unexpected symbol '￿' at (1,5)
+   at Compiler.Lexer.ThrowException() in F:\Programming\projects\Compiler\Compiler\Lexer\Lexer.cs:line 340
+   at Compiler.Lexer.GetNextLexem() in F:\Programming\projects\Compiler\Compiler\Lexer\Lexer.cs:line 180
+   at Test.LexerTest.Test() in F:\Programming\projects\Compiler\Test\LexerTest\LexerTest.cs:line 22

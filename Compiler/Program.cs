@@ -29,15 +29,20 @@ namespace Compiler {
             if ( typeAnalyze == "lexer" ) {
                 if ( typeRead == "file" ) {
                     if ( path != "" ) {
-                        var lexer = new Lexer(path);
-                        do {
-                            lexer.GetNextLexem();
-                            if ( !lexer.GetCurrentLexem().isEOF() ) {
-                                Console.WriteLine(lexer.GetCurrentLexem().ToString());
-                            }
+                        try {
+                            var lexer = new Lexer(path);
+                            do {
+                                lexer.GetNextLexem();
+                                if ( !lexer.GetCurrentLexem().isEOF() ) {
+                                    Console.WriteLine(lexer.GetCurrentLexem().ToString());
+                                }
+                            } while ( !lexer.GetCurrentLexem().isEOF() );
 
-                        } while ( !lexer.GetCurrentLexem().isEOF() );
-                        lexer.Close();
+                            lexer.Close();
+                        }
+                        catch ( Exception e ) {
+                            Console.WriteLine(e);
+                        }
                     }
                 }
             }
