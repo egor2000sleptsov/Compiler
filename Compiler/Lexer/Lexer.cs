@@ -57,7 +57,8 @@ namespace Compiler {
                                                           "var", "where", "while", "with", "xor", "abstract", "default",
                                                           "external", "forward", "internal", "on", "overload",
                                                           "override", "params", "private", "protected", "public",
-                                                          "read", "readln", "reintroduce", "unit", "virtual", "write", "writeln"
+                                                          "read", "readln", "reintroduce", "unit", "virtual", "write",
+                                                          "writeln"
                                                       };
 
         private ArrayList _separators = new ArrayList() { '.', ',', ':', ';', '(', ')', '[', ']', ".." };
@@ -157,12 +158,17 @@ namespace Compiler {
 
                     case States.RealEDegree:
                         if ( char.IsDigit(_symbol) ) KeepSymbol();
-                        else return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')), States.Real);
-
+                        else if ( _operations.Contains(_symbol) ||
+                                  _separators.Contains(_symbol) ||
+                                  _whitespaces.ContainsValue(_symbol) )
+                            return SetAndReturnLexem(double.Parse(_buffer.Replace('.', ',')), States.Real);
+                        else {
+                            ThrowException();
+                        }
+                        
                         break;
                     case States.String:
                         if ( _symbol.Equals('\u0027') ) {
-                            
                             KeepSymbol();
                             if ( _symbol == '#' ) {
                                 KeepSymbol(States.StringASCII);
@@ -194,7 +200,7 @@ namespace Compiler {
                         else if ( _symbol == '\u0027' ) {
                             if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
                             KeepSymbol(States.String);
-                        } 
+                        }
                         else if ( _symbol == '\uffff' ) {
                             if ( _buffer[_buffer.Length - 1] == '#' ) ThrowException();
                             return SetAndReturnLexem(ParseASCII(_buffer), States.String);
