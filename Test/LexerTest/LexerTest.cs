@@ -16,7 +16,7 @@ namespace Test {
         private ArrayList _mistakesList = new ArrayList();
 
         [Test]
-        private void Test() {
+        private void MakeResult() {
             IEnumerable<string> inputFiles = Directory.EnumerateFiles(Lexer.testsPath);
             foreach ( string inputFile in inputFiles ) {
                 var fileName = inputFile.Substring(inputFile.LastIndexOf('\\') + 1);
@@ -37,7 +37,7 @@ namespace Test {
         }
         
         [Test]
-        public void Test1() {
+        public void Test() {
             IEnumerable<string> inputFiles = Directory.EnumerateFiles(Lexer.testsPath);
             foreach ( string inputFile in inputFiles ) {
                 var fileName = inputFile.Substring(inputFile.LastIndexOf('\\') + 1);
