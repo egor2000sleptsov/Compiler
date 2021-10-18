@@ -74,8 +74,8 @@ namespace Compiler {
         private States _state;
         private Lexem _lexem;
 
-        public Lexer(string path) {
-            _file = new StreamReader(testsPath + path);
+        public Lexer(string fileName) {
+            _file = new StreamReader(testsPath + fileName);
             _col = 0;
             _line = 1;
             _state = States.Start;

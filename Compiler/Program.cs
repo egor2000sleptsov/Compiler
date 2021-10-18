@@ -1,48 +1,37 @@
 ﻿using System.IO;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Compiler {
     class Program {
         static void Main(string[] args) {
-            // var command = Console.ReadLine().Trim().Split(' ');
-            var command = args; //todo: Удали потом
-            var typeAnalyze = "";
-            var typeRead = "";
-            var path = "";
-            foreach ( var str in command ) {
-                if ( str == "lexer" ) {
-                    typeAnalyze = str;
-                }
-                else if ( str == "file" ) {
-                    typeRead = str;
-                }
-                else if ( str == "dir" ) {
-                    typeRead = str;
-                }
-                else if ( File.Exists(Lexer.testsPath + str) || Directory.Exists(Lexer.testsPath + str) ) {
-                    path = str;
+            string[] commands = args.Length > 1 ? args : Console.ReadLine().Trim().Split(' ');
+            if ( commands[0] == "-l" ) {
+                if ( commands[1] == "-f" ) {
+                    var lexer = new Lexer(commands[2]);
+                    try {
+                        do {
+                            if ( !lexer.GetNextLexem().isEOF() ) {
+                                Console.WriteLine(lexer.GetCurrentLexem().ToString());
+                            }
+                        } while ( !lexer.GetCurrentLexem().isEOF() );
+                    }
+                    catch ( LexerException e ) {
+                        Console.WriteLine(e.Message);
+                    }
                 }
             }
-
-            if ( typeAnalyze == "lexer" ) {
-                if ( typeRead == "file" ) {
-                    if ( path != "" ) {
-                        try {
-                            var lexer = new Lexer(path);
-                            do {
-                                lexer.GetNextLexem();
-                                if ( !lexer.GetCurrentLexem().isEOF() ) {
-                                    Console.WriteLine(lexer.GetCurrentLexem().ToString());
-                                }
-                            } while ( !lexer.GetCurrentLexem().isEOF() );
-
-                            lexer.Close();
-                        }
-                        catch ( Exception e ) {
-                            Console.WriteLine(e);
-                        }
+            else if ( commands[0] == "-p" ) {
+                if ( commands[1] == "-f" ) {
+                    try {
+                        var lexer = new Lexer(commands[2]);
+                        var node = new Parser(lexer).ParseExpr();
+                        Console.WriteLine(node.Print());
+                    }
+                    catch ( Exception e ) {
+                        Console.WriteLine(e);
                     }
                 }
             }

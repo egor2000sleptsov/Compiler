@@ -16,4 +16,8 @@
       <ProjectReference Include="..\Compiler\Compiler.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="ParserTest\tests" />
+    </ItemGroup>
+
 </Project>

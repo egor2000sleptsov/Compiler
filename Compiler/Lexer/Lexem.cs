@@ -16,17 +16,10 @@ namespace Compiler {
 
         public override string ToString() => $"{_coordinates.Item1} {_coordinates.Item2}\t\t{_state}\t\t{_value}\t\t{_sourceCode}";
         
-
-        public Tuple<int, int> GetCoordinates() => _coordinates;
-
-        public new Lexer.States GetType() => _state;
-
         public object GetValue() => _value;
 
-        public string GetCode() => _sourceCode;
+        public Lexer.States GetType() => _state;
 
-        public bool isEOF() {
-            return _state == Lexer.States.EOF;
-        }
+        public bool isEOF() => _state == Lexer.States.EOF;
     }
 }
