@@ -26,7 +26,7 @@ namespace Compiler {
             else if ( commands[0] == "-p" ) {
                 if ( commands[1] == "-f" ) {
                     try {
-                        var lexer = new Lexer(commands[2]);
+                        var lexer = new Lexer(commands[2], true);
                         var node = new Parser(lexer).ParseExpr();
                         Console.WriteLine(node.Print());
                     }

@@ -65,6 +65,7 @@ namespace Compiler {
         private ArrayList _assignments = new ArrayList() { ":=", "+=", "-=", "*=", "/=" };
 
         public static readonly string testsPath = @"F:\Programming\projects\Compiler\Test\LexerTest\tests\";
+        public static readonly string parserTestsPath = @"F:\Programming\projects\Compiler\Test\ParserTest\tests\";
         private string _buffer;
         private char _symbol;
         private StreamReader _file;
@@ -74,8 +75,8 @@ namespace Compiler {
         private States _state;
         private Lexem _lexem;
 
-        public Lexer(string fileName) {
-            _file = new StreamReader(testsPath + fileName);
+        public Lexer(string fileName, bool isParser = false) {
+            _file = isParser ? new StreamReader(parserTestsPath + fileName) : new StreamReader(testsPath + fileName);
             _col = 0;
             _line = 1;
             _state = States.Start;
@@ -165,7 +166,7 @@ namespace Compiler {
                         else {
                             ThrowException();
                         }
-                        
+
                         break;
                     case States.String:
                         if ( _symbol.Equals('\u0027') ) {

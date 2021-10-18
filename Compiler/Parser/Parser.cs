@@ -17,7 +17,7 @@ namespace Compiler {
 
             var left = ParseTerm();
             var operation = _currentLexem;
-            if ( operation.GetValue().ToString() == "-" || operation.GetValue().ToString() == "+") {
+            while ( operation.GetValue().ToString() == "-" || operation.GetValue().ToString() == "+") {
                 _currentLexem = _lexer.GetNextLexem();
                 var right = ParseExpr();
                 return new BinaryOperationNode(operation, left, right);
@@ -29,7 +29,7 @@ namespace Compiler {
         private Node ParseTerm() {
             var left = ParseFactor();
             var operation = _currentLexem;
-            if ( operation.GetValue().ToString() == "*" || operation.GetValue().ToString() == "/" ) {
+            while ( operation.GetValue().ToString() == "*" || operation.GetValue().ToString() == "/"  || operation.GetValue().ToString() == "mod" || operation.GetValue().ToString() == "div") {
                 _currentLexem = _lexer.GetNextLexem();
                 var right = ParseTerm();
                 return new BinaryOperationNode(operation, left, right);
@@ -44,6 +44,9 @@ namespace Compiler {
             if ( lexem.GetType() == States.Integer ) return new IntegerNode(lexem);
             if ( lexem.GetType() == States.Real ) return new RealNode(lexem);
 
+            if ( lexem.GetValue().ToString() == "-" || lexem.GetValue().ToString() == "+") {
+                return new UnaryOperationNode(ParseFactor(), lexem);
+            }
             if ( lexem.GetValue().ToString() == "(" ) {
                 var left = ParseExpr();
                 lexem = _currentLexem;
